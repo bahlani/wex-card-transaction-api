@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using CardTransactionApi.Dtos;
 using Moq;
 
 namespace CardTransactionApi.Tests.Integration;

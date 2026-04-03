@@ -1,19 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json.Serialization;
 using CardTransactionApi.Dtos;
 using Moq;
 
 namespace CardTransactionApi.Tests.Integration;
-
-public class ErrorResponse
-{
-    [JsonPropertyName("errorCode")]
-    public string ErrorCode { get; set; } = string.Empty;
-
-    [JsonPropertyName("error")]
-    public string Error { get; set; } = string.Empty;
-}
 
 public class TransactionsControllerTests : IDisposable
 {

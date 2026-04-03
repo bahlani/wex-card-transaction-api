@@ -62,7 +62,7 @@ public class CardsController : ControllerBase
 
         if (card is null)
         {
-            return NotFound(new { errorCode = "CARD_NOT_FOUND", error = $"Card with ID '{id}' not found." });
+            return NotFound(new ErrorResponse("CARD_NOT_FOUND", $"Card with ID '{id}' not found."));
         }
 
         // SQLite doesn't support SUM on decimal, so we fetch amounts and sum client-side.
@@ -93,16 +93,13 @@ public class CardsController : ControllerBase
             }
             catch (HttpRequestException)
             {
-                return StatusCode(502, new
-                {
-                    errorCode = "CURRENCY_CONVERSION_UNAVAILABLE",
-                    error = "Currency conversion is temporarily unavailable. Please try again later."
-                });
+                return StatusCode(502, new ErrorResponse("CURRENCY_CONVERSION_UNAVAILABLE",
+                    "Currency conversion is temporarily unavailable. Please try again later."));
             }
 
             if (exchangeRate is null)
             {
-                return BadRequest(new { errorCode = "EXCHANGE_RATE_NOT_FOUND", error = $"No exchange rate available for currency '{currency}'." });
+                return BadRequest(new ErrorResponse("EXCHANGE_RATE_NOT_FOUND", $"No exchange rate available for currency '{currency}'."));
             }
 
             response.Currency = currency;

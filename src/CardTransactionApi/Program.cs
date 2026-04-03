@@ -43,11 +43,9 @@ app.UseExceptionHandler(errorApp =>
     {
         context.Response.StatusCode = 500;
         context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync(new
-        {
-            errorCode = "INTERNAL_ERROR",
-            error = "An unexpected error occurred. Please try again later."
-        });
+        await context.Response.WriteAsJsonAsync(
+            new CardTransactionApi.Dtos.ErrorResponse("INTERNAL_ERROR",
+                "An unexpected error occurred. Please try again later."));
     });
 });
 

@@ -1,3 +1,4 @@
+using CardTransactionApi.Dtos;
 using CardTransactionApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,11 +31,8 @@ public class CurrenciesController : ControllerBase
         }
         catch (HttpRequestException)
         {
-            return StatusCode(502, new
-            {
-                errorCode = "CURRENCY_CONVERSION_UNAVAILABLE",
-                error = "Currency conversion is temporarily unavailable. Please try again later."
-            });
+            return StatusCode(502, new ErrorResponse("CURRENCY_CONVERSION_UNAVAILABLE",
+                "Currency conversion is temporarily unavailable. Please try again later."));
         }
     }
 }

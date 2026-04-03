@@ -35,7 +35,7 @@ public class TransactionsController : ControllerBase
 
         if (card is null)
         {
-            return NotFound(new { errorCode = "CARD_NOT_FOUND", error = $"Card with ID '{cardId}' not found." });
+            return NotFound(new ErrorResponse("CARD_NOT_FOUND", $"Card with ID '{cardId}' not found."));
         }
 
         // Design decision: reject transactions exceeding the available balance.
@@ -52,11 +52,8 @@ public class TransactionsController : ControllerBase
 
         if (request.Amount > availableBalance)
         {
-            return BadRequest(new
-            {
-                errorCode = "INSUFFICIENT_BALANCE",
-                error = $"Transaction amount ${request.Amount:F2} exceeds available balance ${availableBalance:F2}."
-            });
+            return BadRequest(new ErrorResponse("INSUFFICIENT_BALANCE",
+                $"Transaction amount ${request.Amount:F2} exceeds available balance ${availableBalance:F2}."));
         }
 
         var transaction = new Transaction
@@ -94,13 +91,13 @@ public class TransactionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
-    public async Task<IActionResult> GetTransaction(Guid id, [FromQuery] string? currency = null)
+    public async Task<ActionResult<TransactionResponse>> GetTransaction(Guid id, [FromQuery] string? currency = null)
     {
         var transaction = await _db.Transactions.FindAsync(id);
 
         if (transaction is null)
         {
-            return NotFound(new { errorCode = "TRANSACTION_NOT_FOUND", error = $"Transaction with ID '{id}' not found." });
+            return NotFound(new ErrorResponse("TRANSACTION_NOT_FOUND", $"Transaction with ID '{id}' not found."));
         }
 
         // If no currency specified, return the transaction in its original currency
@@ -125,22 +122,16 @@ public class TransactionsController : ControllerBase
         }
         catch (HttpRequestException)
         {
-            return StatusCode(502, new
-            {
-                errorCode = "CURRENCY_CONVERSION_UNAVAILABLE",
-                error = "Currency conversion is temporarily unavailable. Please try again later."
-            });
+            return StatusCode(502, new ErrorResponse("CURRENCY_CONVERSION_UNAVAILABLE",
+                "Currency conversion is temporarily unavailable. Please try again later."));
         }
 
         if (exchangeRate is null)
         {
-            return BadRequest(new
-            {
-                errorCode = "EXCHANGE_RATE_NOT_FOUND",
-                error = $"The purchase cannot be converted to the target currency '{currency}'. " +
-                        $"No exchange rate is available within 6 months on or before the transaction date " +
-                        $"({transaction.TransactionDate:yyyy-MM-dd})."
-            });
+            return BadRequest(new ErrorResponse("EXCHANGE_RATE_NOT_FOUND",
+                $"The purchase cannot be converted to the target currency '{currency}'. " +
+                $"No exchange rate is available within 6 months on or before the transaction date " +
+                $"({transaction.TransactionDate:yyyy-MM-dd})."));
         }
 
         var convertedAmount = Math.Round(transaction.Amount * exchangeRate.Value, 2);
